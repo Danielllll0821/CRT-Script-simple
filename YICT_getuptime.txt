@@ -1,0 +1,92 @@
+#$language = "VBScript"
+#$interface = "1.0"
+
+Sub Main
+    '打开保存设备管理地址以及密码的文件
+    Const ForReading = 1, ForWriting = 2, ForAppending = 8
+    Dim fso,file1,line,logfile,params,ipaddr,username,password
+    Set fso = CreateObject("Scripting.FileSystemObject")
+    Set file1 = fso.OpenTextFile("D:\YICT盐田国际\自动巡检脚本\hostlist.txt",Forreading, False)   
+    Set file2 = fso.CreateTextFile("D:\YICT盐田国际\自动巡检脚本\uptime.txt",ForAppending , False) 
+    crt.Screen.Synchronous = True
+    DO While file1.AtEndOfStream <> True
+       '读出每行
+       line = file1.ReadLine
+       '分离每行的参数 IP地址 密码 En密码
+       params = Split (line)
+	   ipaddr = params(0)
+	   username = params(1)
+	   password = params(2)
+	   
+	logfile = "D:\YICT盐田国际\自动巡检-Log\uptime .log"   
+		
+			'调用Telnet_Login函数
+		Telnet_Login ipaddr,username,password
+		crt.Screen.Send "show ver | in uptime" & vbCr
+		
+		crt.Screen.Send "show privilege"
+		outPut = crt.Screen.ReadString ("show privilege")
+		'msgbox outPut
+		file2.Write  vbcrlf 
+		file2.Write( ipaddr)
+		file2.Write  vbtab 
+		outPut1= Split(outPut,vbCr)(3)
+		 'msgbox outPut1		
+		file2.WriteLine(outPut1)
+		'file2.Write(outPut1)
+		file2.Write "---------------------------------------------------------------------------------------------------------------------------------"
+   '开启记录日志
+	   'crt.Session.LogFileName = logfile
+	   'crt.Session.Log(true) 
+
+		if InStr(output,">")  Then
+			PrivilegeLevel ">",ipaddr
+			crt.Session.Disconnect
+		Elseif InStr(outPut,"#") Then
+			PrivilegeLevel "#",ipaddr
+			crt.Session.Disconnect
+		End if
+	
+	 	 
+    loop
+    crt.Screen.Synchronous = False
+	'crt.Quit 	
+End Sub
+
+Function Telnet_Login(ipaddress,username,password)
+
+	   'Telnet到这个设备上
+        crt.Session.Connect "/TELNET " & ipaddress
+
+	   '输入telnet密码
+	    crt.Screen.WaitForString "Username:"
+        crt.Screen.Send username & vbcr
+        crt.Screen.WaitForString "Password:"
+        crt.Screen.Send password & vbcr
+       '进特权模式
+       'crt.Screen.Send "enable" & vbcr
+       'crt.Screen.WaitForString "Password:"
+       'crt.Screen.Send params(3) & vbcr	
+End Function
+
+
+
+
+
+Function PrivilegeLevel(str1,ipaddress)
+		 
+       'crt.Screen.waitForString "#"
+	   
+	   '从"show run | in host" 的结果中提取用户名，并代入文件中
+	   'crt.Screen.Send  vbCr 
+	   'Result = crt.Screen.ReadString(str1)
+
+       
+	  
+	   
+	   
+	  
+
+	 
+End Function
+
